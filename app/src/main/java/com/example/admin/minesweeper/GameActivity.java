@@ -196,6 +196,7 @@ public class GameActivity extends AppCompatActivity {
         Collections.reverse(topList);
         while(topList.size()>10) topList.remove(10);
         SharedPreferences.Editor editor = prefs.edit();
+        editor.clear();
         editor.putStringSet("Top10",new HashSet<String>(topList));
         editor.apply();
         return topList;

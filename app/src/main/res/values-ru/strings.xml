@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="app_name">Сапер</string>
     <string name="btn_play">Играть</string>
     <string name="btn_top_10">Топ 10</string>
     <string name="btn_end_game">Закончить</string>
