@@ -7,26 +7,25 @@
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
-    tools:context="com.example.admin.minesweeper.MainMenu">
+    tools:context="com.example.admin.minesweeper.EnterNameActivity">
 
+    <EditText
+        android:layout_marginTop="100dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/editTextName"
+        android:hint="Enter your name"
+        android:gravity="center"
+        android:layout_centerHorizontal="true" />
 
     <Button style="?android:attr/borderlessButtonStyle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Play"
-        android:id="@+id/button"
-        android:onClick="playButtonPressed"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="100dp" />
+        android:text="Start"
+        android:onClick="startButtonPressed"
+        android:id="@+id/button3"
+        android:layout_below="@+id/editTextName"
+        android:layout_centerHorizontal="true" />
 
-    <Button style="?android:attr/borderlessButtonStyle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Top 10"
-        android:id="@+id/button2"
-        android:layout_below="@+id/button"
-        android:layout_alignLeft="@+id/button"
-        android:layout_alignStart="@+id/button" />
 
 </RelativeLayout>
