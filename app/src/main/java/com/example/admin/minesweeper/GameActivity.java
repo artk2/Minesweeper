@@ -1,9 +1,9 @@
 package com.example.admin.minesweeper;
 
-import android.app.Activity;
 import android.graphics.Color;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.GridLayout;
@@ -23,16 +23,14 @@ public class GameActivity extends AppCompatActivity {
     public final float bombFrequency = 0.2f;
     public final String fieldColor = "#aacccc";
     //
-    TextView textViewName;
-    String name;
-    int fieldSize;
-    int screenWidth;
-    int screenHeight;
-    Cell[][] cells;
-    Button[][] btn;
-    int score;
-    int maxScore;
-    boolean playing;
+    static int screenWidth;
+    static int screenHeight;
+    static GridLayout grid;
+    static TextView textViewName;
+    static String name;
+    static Button[][] btn;
+    static Game game;
+    static int fieldSize;
 
 
     @Override
@@ -41,41 +39,23 @@ public class GameActivity extends AppCompatActivity {
         setContentView(R.layout.activity_game);
 
         name = getIntent().getStringExtra("Name");
-        if (name==null || name.equals("")) name = "player";
-        textViewName = (TextView)findViewById(R.id.textViewName);
+        if (name == null || name.equals("")) name = "player";
+
+        grid = (GridLayout) findViewById(R.id.gridLayout);
+        textViewName = (TextView) findViewById(R.id.textViewName);
         textViewName.setText("Hello, " + name);
 
         screenWidth = getResources().getDisplayMetrics().widthPixels;
         screenHeight = getResources().getDisplayMetrics().heightPixels;
 
-        fieldSize = minFieldSize + new Random().nextInt(maxFieldSize - minFieldSize + 1);
-//        textViewName.setText(fieldSize + "");
-        generateField();
+        game = new Game(minFieldSize,maxFieldSize,bombFrequency);
+        fieldSize = game.getFieldSize();
         drawField();
-        playing = true;
-        score = 0;
-    }
-
-    void generateField(){
-        int bombsCount;
-        do { // prevent from creating empty field (not likely to happen)
-            bombsCount = 0;
-            cells = new Cell[fieldSize][fieldSize];
-            for (int i = 0; i < fieldSize; i++) {
-                for (int j = 0; j < fieldSize; j++) {
-                    cells[i][j] = new Cell(bombFrequency);
-                    if (cells[i][j].isBomb()) bombsCount++;
-                }
-            }
-//            Log.i("artk","Generated field with " + bombsCount + " bombs");
-        } while (bombsCount==0);
-        maxScore = (fieldSize*fieldSize) - bombsCount;
     }
 
     void drawField(){
         btn = new Button[fieldSize][fieldSize];
 
-        GridLayout grid = (GridLayout) findViewById(R.id.gridLayout);
         grid.setColumnCount(fieldSize);
         grid.setBackgroundColor(Color.parseColor(fieldColor));
 
@@ -87,9 +67,9 @@ public class GameActivity extends AppCompatActivity {
 //        textViewName.setText(fieldSize + "");
         if(buttonSize < minCellWidth) buttonSize = minCellWidth;
         if(buttonSize > maxCellWidth) buttonSize = maxCellWidth;
-//        Log.i("artk", "vertical: " + vertical);
-//        Log.i("artk", "screen width: " + screenWidth + ", height: " + screenHeight);
-//        Log.i("artk", "button amount: " + fieldSize + ", size: " + buttonSize);
+        Log.i("artk", "vertical: " + vertical);
+        Log.i("artk", "screen width: " + screenWidth + ", height: " + screenHeight);
+        Log.i("artk", "button amount: " + fieldSize + ", size: " + buttonSize);
 
         String btnText;
         for(int i = 0; i < fieldSize; i++) {
@@ -110,14 +90,64 @@ public class GameActivity extends AppCompatActivity {
                 final int y = j;
                 btn[i][j].setOnClickListener(new View.OnClickListener() {
                     public void onClick(View v) {
-                        if(playing) openCell(x,y);
-                        textViewName.setText("Your current score: " + score);
+                        if(game.isPlaying()){
+                            game.openCell(x,y);
+                        }
                     }
                 });
 
                 grid.addView(btn[i][j]);
             }
         }
+        Log.i("artk","field drawn");
+    }
+
+    static void updateButton(int x, int y, int result){
+        textViewName.setText("Your current score: " + game.getScore());
+        String btnText = "B";
+        if (result == -1) textViewName.setText("Game over. Your score: " + game.getScore());
+        else if (result == 0) btnText = "0";
+        else if (result > 0) btnText = String.valueOf(result);
+        btn[x][y].setText(btnText);
+    }
+}
+
+class Game{
+
+    int fieldSize;
+    Cell[][] cells;
+    int score;
+    int maxScore;
+    boolean playing;
+
+    Game(int minFieldSize, int maxFieldSize, float bombFrequency){
+        this.fieldSize = minFieldSize + new Random().nextInt(maxFieldSize - minFieldSize + 1);
+        this.cells = generateField(fieldSize, bombFrequency);
+        playing = true;
+        score = 0;
+    }
+
+    Game(Cell[][] cells){
+
+    }
+
+
+    Cell[][] generateField(int fieldSize, float bombFrequency){
+        int bombsCount;
+        Cell[][] c;
+        do { // prevent from creating empty field (not likely to happen)
+            bombsCount = 0;
+            c = new Cell[fieldSize][fieldSize];
+            for (int i = 0; i < fieldSize; i++) {
+                for (int j = 0; j < fieldSize; j++) {
+                    c[i][j] = new Cell(bombFrequency);
+                    if (c[i][j].isBomb()) bombsCount++;
+                }
+            }
+            Log.i("artk","Generated field with " + bombsCount + " bombs");
+        } while (bombsCount==0);
+        this.maxScore = (fieldSize*fieldSize) - bombsCount;
+        return c;
     }
 
     void openCell(int x, int y){
@@ -152,20 +182,53 @@ public class GameActivity extends AppCompatActivity {
                 }
             }
         }
-        String btnText = "B";
-        if (result == 0) btnText = "0";
-        else if (result > 0) btnText = String.valueOf(result);
-        btn[x][y].setText(btnText);
-
-        if (!playing) textViewName.setText("Game over. Your score: " + score);
-//        btn[x][y].setBackgroundColor(Color.parseColor("#cccccc"));
+        GameActivity.updateButton(x,y,result);
     }
 
+    public int getFieldSize() {
+        return fieldSize;
+    }
+
+    public void setFieldSize(int fieldSize) {
+        this.fieldSize = fieldSize;
+    }
+
+    public int getMaxScore() {
+        return maxScore;
+    }
+
+    public void setMaxScore(int maxScore) {
+        this.maxScore = maxScore;
+    }
+
+    public int getScore() {
+        return score;
+    }
+
+    public void setScore(int score) {
+        this.score = score;
+    }
+
+    public boolean isPlaying() {
+        return playing;
+    }
+
+    public void setPlaying(boolean playing) {
+        this.playing = playing;
+    }
+
+    public Cell[][] getCells() {
+        return cells;
+    }
+
+    public void setCells(Cell[][] cells) {
+        this.cells = cells;
+    }
 }
 
 class Cell {
     private boolean bomb;
-    private boolean open = false;
+    private boolean open = false; // not necessary (?)
 
     public Cell(float freq) {
         Random r = new Random();
