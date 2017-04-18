@@ -17,4 +17,8 @@ public class MainMenu extends AppCompatActivity {
         startActivity(new Intent(this, EnterNameActivity.class));
     }
 
+    void topButtonPressed(View v){
+        startActivity(new Intent(this, TopActivity.class));
+    }
+
 }

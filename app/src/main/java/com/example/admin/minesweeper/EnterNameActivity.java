@@ -19,10 +19,16 @@ public class EnterNameActivity extends AppCompatActivity {
     }
 
     void startButtonPressed(View v){
-        startActivity(new Intent(this, EnterNameActivity.class));
         name = editTextName.getText().toString();
         Intent intent = new Intent(getBaseContext(), GameActivity.class);
         intent.putExtra("Name", name);
-        startActivity(intent);
+        startActivityForResult(intent,1);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if(resultCode==1){
+            finish();
+        }
     }
 }
