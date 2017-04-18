@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="btn_play">Играть</string>
+    <string name="btn_top_10">Топ 10</string>
+    <string name="btn_end_game">Закончить</string>
+    <string name="btn_repeat_game">Перезапустить</string>
+    <string name="btn_new_game">Новая игра</string>
+    <string name="hint_enter_your_name">Введите ваше имя</string>
+    <string name="btn_start">Начать</string>
+    <string name="default_player_name">игрок</string>
+    <string name="msg_top_10_scores">Топ 10 результатов:\n</string>
+    <string name="msg_welcome">"Добро пожаловать, %1$s"</string>
+    <string name="msg_field_size">". Размер поля: %1$dx%2$d"</string>
+    <string name="msg_current_score">"Очки: %1$d"</string>
+    <string name="msg_win">"Вы выиграли! Очки: %1$d"</string>
+    <string name="msg_lose">"Вы проиграли! Очки: %1$d"</string>
+</resources>

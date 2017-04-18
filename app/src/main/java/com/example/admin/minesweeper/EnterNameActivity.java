@@ -18,8 +18,9 @@ public class EnterNameActivity extends AppCompatActivity {
         editTextName = (EditText)findViewById(R.id.editTextName);
     }
 
-    void startButtonPressed(View v){
+    public void startButtonPressed(View v){
         name = editTextName.getText().toString();
+        if (name.equals("")) name = getString(R.string.default_player_name);
         Intent intent = new Intent(getBaseContext(), GameActivity.class);
         intent.putExtra("Name", name);
         startActivityForResult(intent,1);

@@ -14,14 +14,14 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/editTextName"
-        android:hint="Enter your name"
+        android:hint="@string/hint_enter_your_name"
         android:gravity="center"
         android:layout_centerHorizontal="true" />
 
     <Button style="?android:attr/borderlessButtonStyle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Start"
+        android:text="@string/btn_start"
         android:onClick="startButtonPressed"
         android:id="@+id/button3"
         android:layout_below="@+id/editTextName"

@@ -1,3 +1,17 @@
 <resources>
     <string name="app_name">Minesweeper</string>
+    <string name="btn_play">Play</string>
+    <string name="btn_top_10">Top 10</string>
+    <string name="btn_end_game">End Game</string>
+    <string name="btn_repeat_game">Repeat Game</string>
+    <string name="btn_new_game">New Game</string>
+    <string name="hint_enter_your_name">Enter your name</string>
+    <string name="btn_start">Start</string>
+    <string name="default_player_name">player</string>
+    <string name="msg_top_10_scores">Top 10 scores:\n</string>
+    <string name="msg_welcome">"Hello, %1$s"</string>
+    <string name="msg_field_size">". Field size: %1$dx%2$d"</string>
+    <string name="msg_current_score">"Your score: %1$d"</string>
+    <string name="msg_win">"You win! Your score: %1$d"</string>
+    <string name="msg_lose">"You lose! Your score: %1$d"</string>
 </resources>

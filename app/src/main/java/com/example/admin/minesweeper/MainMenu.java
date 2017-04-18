@@ -13,12 +13,11 @@ public class MainMenu extends AppCompatActivity {
         setContentView(R.layout.activity_main_menu);
     }
 
-    void playButtonPressed(View v){
+    public void playButtonPressed(View v){
         startActivity(new Intent(this, EnterNameActivity.class));
     }
 
-    void topButtonPressed(View v){
+    public void topButtonPressed(View v){
         startActivity(new Intent(this, TopActivity.class));
     }
-
 }

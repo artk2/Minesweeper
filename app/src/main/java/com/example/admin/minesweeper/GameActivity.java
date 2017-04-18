@@ -2,37 +2,27 @@ package com.example.admin.minesweeper;
 
 import android.app.Activity;
 import android.content.Context;
-import android.content.DialogInterface;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
+import android.support.v7.app.AppCompatActivity;
 import android.view.Gravity;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewGroupOverlay;
 import android.widget.Button;
-import android.widget.FrameLayout;
 import android.widget.GridLayout;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
-
-import org.w3c.dom.Text;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -49,42 +39,37 @@ public class GameActivity extends AppCompatActivity {
     public static final int maxCellWidth = 100;
     public static final float bombFrequency = 0.15f; // not used
     public static final String fieldColor = "#aacccc";
-    //
-    static int screenWidth;
-    static int screenHeight;
-    static GridLayout grid;
-    static TextView textViewName;
-    static String name;
-    static Button[][] btn;
-    static Game game;
-    static int fieldSize;
-    static Context context;
-    static Activity activity;
-    static ViewGroup root;
-    static SharedPreferences prefs;
-    static final String pFile = "Top10";
-
-    //RelativeLayout parentLayout;
-    static LayoutInflater layoutInflater;
-    static ViewGroup container;
+    /////////////////////
+    private static String playerName;
+    private static Game game;
+    private static Button[][] btn;
+    private static int screenWidth;
+    private static int screenHeight;
+    private static Context context;
+    private static Activity activity;
+    private static ViewGroup root;
+    private static GridLayout grid;
+    private static TextView textViewName;
+    private static LayoutInflater layoutInflater;
+    private static ViewGroup container;
+    private static SharedPreferences prefs;
+    private static final String pFile = "Top10";
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_game);
-        context = this;
-        activity = this;
         setResult(1);
 
-        name = getIntent().getStringExtra("Name");
-        if (name == null || name.equals("")) name = "player";
-
         grid = (GridLayout) findViewById(R.id.gridLayout);
-        textViewName = (TextView) findViewById(R.id.textViewName);
-        textViewName.setText("Hello, " + name);
-        root = (ViewGroup) getWindow().getDecorView().getRootView();
 
+        playerName = getIntent().getStringExtra("Name");
+        textViewName = (TextView) findViewById(R.id.textViewName);
+        textViewName.setText(getString(R.string.msg_welcome, playerName));
+
+        context = this;
+        activity = this;
         screenWidth = getResources().getDisplayMetrics().widthPixels;
         screenHeight = getResources().getDisplayMetrics().heightPixels;
 
@@ -104,23 +89,15 @@ public class GameActivity extends AppCompatActivity {
         if(vertical) buttonSize = screenWidth / fieldSize;
         else buttonSize = screenHeight / fieldSize;
         buttonSize *= 0.9;
-//        textViewName.setText(fieldSize + "");
         if(buttonSize < minCellWidth) buttonSize = minCellWidth;
         if(buttonSize > maxCellWidth) buttonSize = maxCellWidth;
-//        Log.i("artk", "vertical: " + vertical);
-//        Log.i("artk", "screen width: " + screenWidth + ", height: " + screenHeight);
-//        Log.i("artk", "button amount: " + fieldSize + ", size: " + buttonSize);
 
-        String btnText;
         for(int i = 0; i < fieldSize; i++) {
             for(int j = 0; j < fieldSize; j++) {
 
                 btn[i][j] = new Button(context);
-
                 LinearLayout.LayoutParams layoutParams = new  LinearLayout.LayoutParams(buttonSize , buttonSize);
-                layoutParams.setMargins(0,0,0,0);
-//                btn[i][j].setHeight(buttonSize);
-//                btn[i][j].setWidth(buttonSize);
+//                layoutParams.setMargins(0,0,0,0);
                 btn[i][j].setPadding(0,0,0,0);
                 btn[i][j].setLayoutParams(layoutParams);
                 final int x = i;
@@ -135,34 +112,43 @@ public class GameActivity extends AppCompatActivity {
                 grid.addView(btn[i][j]);
             }
         }
+        textViewName.append(context.getString(R.string.msg_field_size, fieldSize,fieldSize));
     }
 
-    static void updateButton(int x, int y, int result){
-        textViewName.setText("Your score: " + game.getScore());
+    static void updateCell(int x, int y, int result){
+        textViewName.setText(context.getString(R.string.msg_current_score, game.getScore()));
         String btnText = "B";
         if (result >= 0)  btnText = String.valueOf(result);
         btn[x][y].setText(btnText);
+
+        if (result == -1) GameActivity.endGame(false);
         if (game.getScore() == game.getMaxScore()) endGame(true);
     }
 
-    static void endGame(boolean win){
+    private static void endGame(boolean win){
         layoutInflater = (LayoutInflater) context.getSystemService(LAYOUT_INFLATER_SERVICE);
         container = (ViewGroup)layoutInflater.inflate(R.layout.game_end,null);
-        final PopupWindow popupWindow = new PopupWindow(container,500,700,true);
+        final PopupWindow popupWindow = new PopupWindow(container,500,750,true);
         popupWindow.showAtLocation(grid, Gravity.CENTER,0,0);
+
+        root = (ViewGroup) activity.getWindow().getDecorView().getRootView();
+        Drawable dim = new ColorDrawable(Color.BLACK);
+        dim.setBounds(0, 0, screenWidth, screenHeight);//root.getWidth(), root.getHeight());
+        dim.setAlpha((int) (255 * 0.4f));
+        ViewGroupOverlay overlay = root.getOverlay();
+        overlay.add(dim);
 
         TextView textViewResult = (TextView) container.findViewById(R.id.textResult);
         textViewResult.setTypeface(Typeface.MONOSPACE);
-        if(win) textViewResult.setText("You win! Your score: " + game.getScore());
-        else textViewResult.setText("You lose! Your score: " + game.getScore());
+        if(win) textViewResult.setText(context.getString(R.string.msg_win, game.getScore()));
+        else textViewResult.setText(context.getString(R.string.msg_lose, game.getScore()));
 
         List<String> topResults = makeTopTenList();
-        textViewResult.setText(textViewResult.getText() + "\nTop 10 results:");
+        textViewResult.append("\n" + context.getString(R.string.msg_top_10_scores));
         for (String result : topResults){
             String score = result.substring(0,3);
             String name = result.substring(17);
-            result = String.format("%-5s- %s" , score, name);
-            textViewResult.setText(textViewResult.getText() + "\n" + result);
+            textViewResult.append("\n" + String.format("%-5s- %s" , score, name));
         }
 
         Button repeatButton = (Button) container.findViewById(R.id.btnRepeat);
@@ -194,20 +180,13 @@ public class GameActivity extends AppCompatActivity {
                 root.getOverlay().clear();
             }
         });
-        Drawable dim = new ColorDrawable(Color.BLACK);
-        dim.setBounds(0, 0, root.getWidth(), root.getHeight());
-        dim.setAlpha((int) (255 * 0.3f));
-
-        ViewGroupOverlay overlay = root.getOverlay();
-        overlay.add(dim);
-
     }
 
-    static List<String> makeTopTenList(){
+    private static List<String> makeTopTenList(){
         String score = String.valueOf(game.getScore());
         while (score.length()<3) score = " " + score;
         String timeStamp = new SimpleDateFormat("yyyyMMddHHmmss").format(new Date()); // length: 14
-        String entry = score + timeStamp + name;
+        String entry = score + timeStamp + playerName;
 
         prefs = context.getSharedPreferences(pFile, MODE_PRIVATE);
         Set<String> topSet = prefs.getStringSet("Top10",new HashSet<String>());
@@ -226,20 +205,20 @@ public class GameActivity extends AppCompatActivity {
 
 class Game{
 
-    Cell[][] cells;
-    int score;
-    int maxScore;
-    boolean playing;
+    private Cell[][] cells;
+    private int score;
+    private int maxScore;
+    private boolean playing;
 
-    Game(int minFieldSize, int maxFieldSize, float bombFrequency){
+    public Game(int minFieldSize, int maxFieldSize, float bombFrequency){
         int fieldSize = minFieldSize + new Random().nextInt(maxFieldSize - minFieldSize + 1);
-        this.cells = generateField(fieldSize, (float)fieldSize/100 /*bombFrequency*/); // variable frequency 0,1...0,2 (probably better)
+        this.cells = generateField(fieldSize, (float)fieldSize/100 /*bombFrequency*/); // dynamic frequency 0,1...0,2 (probably better)
         this.playing = true;
         this.score = 0;
         GameActivity.drawField(cells.length);
     }
 
-    Game(Cell[][] cells, int maxScore){
+    public Game(Cell[][] cells, int maxScore){
         this.cells = cells;
         for(Cell[] c : cells){
             for (Cell cell : c) cell.setOpen(false);
@@ -248,66 +227,6 @@ class Game{
         this.score = 0;
         this.maxScore = maxScore;
         GameActivity.drawField(cells.length);
-
-//        for(int i = 0; i < cells.length; i++){ // show bombs
-//            for(int j = 0; j < cells.length; j++) {
-//                if(cells[i][j].isBomb()) GameActivity.updateButton(i,j,-1);
-//            }
-//        }
-
-    }
-
-
-    Cell[][] generateField(int fieldSize, float bombFrequency){
-        int bombsCount;
-        Cell[][] c;
-        do { // prevent from creating empty field (not likely to happen)
-            bombsCount = 0;
-            c = new Cell[fieldSize][fieldSize];
-            for (int i = 0; i < fieldSize; i++) {
-                for (int j = 0; j < fieldSize; j++) {
-                    c[i][j] = new Cell(bombFrequency);
-                    if (c[i][j].isBomb()) bombsCount++;
-                }
-            }
-            Log.i("artk","Generated field with " + bombsCount + " bombs");
-        } while (bombsCount==0);
-        this.maxScore = (fieldSize*fieldSize) - bombsCount;
-        return c;
-    }
-
-    void openCell(int x, int y){
-        int result;
-        cells[x][y].setOpen(true);
-        if (cells[x][y].isBomb()){
-            result = -1;
-            playing = false;
-        }
-        else {
-            score++;
-            result = 0;
-            int x1, x2, y1, y2;
-            x1 = (x > 0) ? x-1 : x;
-            x2 = (x < (cells.length - 1)) ? x+1 : x;
-            y1 = (y > 0) ? y-1 : y;
-            y2 = (y < (cells.length - 1)) ? y+1 : y;
-            for (int i = x1; i <= x2; i++){
-                for (int j = y1; j <= y2; j++){
-                    if (cells[i][j].isBomb()){
-                        result++;
-                    }
-                }
-            }
-            if (result == 0){ // open neighbour fields (no bombs there)
-                for (int i = x1; i <= x2; i++) {
-                    for (int j = y1; j <= y2; j++) {
-                        if(!(cells[i][j].isOpen())) openCell(i,j);
-                    }
-                }
-            }
-        }
-        GameActivity.updateButton(x,y,result);
-        if (result == -1) GameActivity.endGame(false);
     }
 
     public int getMaxScore() {
@@ -341,16 +260,66 @@ class Game{
     public void setCells(Cell[][] cells) {
         this.cells = cells;
     }
+
+    void openCell(int x, int y){
+        int result;
+        cells[x][y].setOpen(true);
+        if (cells[x][y].isBomb()){
+            result = -1;
+            playing = false;
+        }
+        else {
+            score++;
+            result = 0;
+            int x1, x2, y1, y2;
+            x1 = (x > 0) ? x-1 : x;
+            x2 = (x < (cells.length - 1)) ? x+1 : x;
+            y1 = (y > 0) ? y-1 : y;
+            y2 = (y < (cells.length - 1)) ? y+1 : y;
+            for (int i = x1; i <= x2; i++){
+                for (int j = y1; j <= y2; j++){
+                    if (cells[i][j].isBomb()){
+                        result++;
+                    }
+                }
+            }
+            if (result == 0){ // open neighbour fields (no bombs there)
+                for (int i = x1; i <= x2; i++) {
+                    for (int j = y1; j <= y2; j++) {
+                        if(!(cells[i][j].isOpen())) openCell(i,j);
+                    }
+                }
+            }
+        }
+        GameActivity.updateCell(x,y,result);
+    }
+
+    private Cell[][] generateField(int fieldSize, float bombFrequency){
+        int bombsCount;
+        Cell[][] c;
+        do { // prevent from creating empty field (not likely to happen)
+            bombsCount = 0;
+            c = new Cell[fieldSize][fieldSize];
+            for (int i = 0; i < fieldSize; i++) {
+                for (int j = 0; j < fieldSize; j++) {
+                    c[i][j] = new Cell(bombFrequency);
+                    if (c[i][j].isBomb()) bombsCount++;
+                }
+            }
+        } while (bombsCount==0);
+        this.maxScore = (fieldSize*fieldSize) - bombsCount;
+        return c;
+    }
 }
 
 class Cell {
     private boolean bomb;
-    private boolean open = false; // not necessary (?)
+    private boolean open;
 
     public Cell(float freq) {
-        Random r = new Random();
-        float f = r.nextFloat();
+        float f = new Random().nextFloat();
         this.bomb = f < freq;
+        this.open = false;
     }
 
     public boolean isBomb() {
